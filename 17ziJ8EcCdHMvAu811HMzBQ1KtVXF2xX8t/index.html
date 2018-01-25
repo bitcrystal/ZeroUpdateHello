@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 
 <html>
 <head>
- <title>New ZeroNet site!</title>
+ <title>ZeroTrackers!</title>
  <meta charset="utf-8">
  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
  <base href="" target="_top" id="base">
@@ -25,15 +24,16 @@ li b { color: #3F51B5; }
 
 <a href="#Select+user" id="select_user" onclick='return page.selectUser()'>Select user</a>:
 <input type="text" id="message" onkeypress="if (event.keyCode == 13) page.sendMessage()">
+<input type="hidden" id="nmessages" value=""/>
 <input type="button" id="send" value="Send!" onclick="return page.sendMessage()"/>
 <ul id="messages">
- <li>Welcome to ZeroChat!</li>
+ <li>Welcome to ZeroTrackers!</li>
 </ul>
 <script type="text/javascript" src="js/ZeroFrame.js"></script>
 
 <script>
 
-class ZeroChat extends ZeroFrame {
+class ZeroTrackers extends ZeroFrame {
     onRequest (cmd, message) {
         if (cmd == "setSiteInfo") {
             if (message.params.cert_user_id)
@@ -64,17 +64,34 @@ class ZeroChat extends ZeroFrame {
             return false
         }
         
-        var lm = this.getMessages()
+        var siaa = this.site_info.auth_address;
+        this.cmd("wrapperNotification", ["info", "Your needed auth_address: " + siaa + ""])
+        var rm = this.getMessages();
+        var trys = 1;
+        var yeah = false;
+        var xv = "";
+        if(rm) {
+          for(var i = 0; i < trys; i++) {
+             if(document.getElementById("nmessages").innerHTML != "") {
+                i = trys;
+                yeah = true;
+             }
+          }
+        }
+        if(yeah) {
+          xv = document.getElementById("nmessages").innerHTML;
+          document.getElementById("nmessages").innerHTML = "";
+          this.cmd("wrapperNotification", ["info", "Export your trackers: "+xv]);
+        } else {
+          this.cmd("wrapperNotification", ["info", "Database is loading! Please Wait!"])
+          return false;
+        }
+        var st = atob(xv);
+        var lm = JSON.parse(st);
         var am = lm[0];
         var am_length = am.length;
         var nm = lm[1];
         var nm_length = nm.length;
-         for(var i = 0; i < am_length; i++)
-                  {
-                     console.log(am[i]);
-                  }
-
-
         var msg_ = document.getElementById("message").value; 
         var oloader = "";
         var loader = "";
@@ -84,6 +101,9 @@ class ZeroChat extends ZeroFrame {
 
         if(msg_ != "" && msg_.endsWith(".json") && msg_ != "trackers.json") {
            loader = msg_;
+           if(siaa != "14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ" ) {
+                loader = "trackers2.json";
+           }
            this.cmd("fileGet", {"inner_path": loader, "required": false}, (track_) => {
             have_oloader = true;
             this.cmd("wrapperNotification", ["info", "Found " + msg_ + " file!"]);
@@ -104,6 +124,9 @@ class ZeroChat extends ZeroFrame {
              this.cmd("wrapperNotification", ["info", "Execute " + msg_ + " command!"]);
              var path = msg_.split("/writetrackerstojson ").join("");
              if(path.endsWith(".json") && path != "trackers.json") {
+                 if(siaa != "14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ" ) {
+                    path = "trackers2.json";
+                 }
                  var newtrackers = { "trackers": [] }
                  newtrackers.trackers = am; 
                  var json_raw_newtrackers = unescape(encodeURIComponent(JSON.stringify(newtrackers, undefined, '\t')))
@@ -125,8 +148,7 @@ class ZeroChat extends ZeroFrame {
                 if (res == "ok") {
                 }
              })   
-             nf = newtrackers;
-             have_nf = true;
+             return false;
           } else if (msg_.startsWith("/addtrackertotrackersjson ")) {
             this.cmd("wrapperNotification", ["info", "Execute " + msg_ + " command!"]);
             var newtracker = msg_.split("/addtrackertotrackersjson ").join("");
@@ -185,9 +207,8 @@ class ZeroChat extends ZeroFrame {
                        if (res == "ok") {
                        }
                   })
-                  nf = track_;
-                  have_nf = true;
                })
+               return false;
             }
           } else if(msg_.startsWith("/addtrackertojson ")) {
             this.cmd("wrapperNotification", ["info", "Execute " + msg_ + " command!"]);
@@ -195,6 +216,9 @@ class ZeroChat extends ZeroFrame {
             var pm = hc.split(' ');
             if(pm.length == 2 && pm[0] != "trackers.json") {
                var path = pm[0];
+               if(siaa != "14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ" ) {
+                    path = "trackers2.json";
+               }
                var newtracker = pm[1];
                this.cmd("fileGet", {"inner_path": path, "required": false}, (track_) => {
                   if (track_) { // Parse current data file
@@ -327,11 +351,6 @@ class ZeroChat extends ZeroFrame {
             var nlt = [];
             var lt_length = lt.length;
             var can_add_lt = true;
-            for(var i = 0; i < am_length; i++)
-            {
-              console.log(am[i]);
-            } 
-
  
             for(var i = 0; i < lt_length; i++)
             {
@@ -356,143 +375,27 @@ class ZeroChat extends ZeroFrame {
             lt_length = undefined;
             can_add_lt = undefined;
 
-            if (msg_ != "" && !msg_.startsWith("/") && !msg_.endsWith(".json")) {
-               for(var i = 0; i < length; i++)
+            if (msg_ != "" && !msg_.startsWith("/") && !msg_.endsWith(".json") && msg_.startsWith("base64:")) {
+               for(var i = 0; i < am_length; i++)
                {
-                  if(message[i].body == msg_)
+                  if(am[i] == msg_)
                   {
                    can_add = false;
-                   i = length;
-                   continue;  
+                   i = am_length;
                   }
                }
                if(can_add)
                {
-                   for(var i = 0; i < am_length; i++)
-                   {
-                      if(am[i] == msg_)
-                      {
-                         can_add = false;
-                         i = length;
-                         continue;  
-                      }
-                   }
-                   if(can_add) {
-                     var length_track = track_.trackers.length;
-                     var cur = "";
-                     for(var i = 0; i < length_track; i++)
-                     {
-                        cur = track_.trackers[i];
-                        if (cur == msg_) {
-                           can_add = false;
-                           i = length_track;
-                        }
-                     }
-                     if(can_add) {
-                       data.message.push({
-                            "body": msg_,
-                            "date_added": Date.now()
-                       })
-                       message = data.message;
-                       length = message.length;
-                     } else {
-                       can_add = false;
-                     }
-                     length_track = undefined;
-                     cur = undefined;
-                   } else {
-                      can_add = true;
-                   }
+                 data.message.push({
+                      "body": msg_,
+                      "date_added": Date.now()
+                 })
+                 message = data.message;
+                 length = message.length;
                } else {
                   can_add = true;
                }
             }
-
-            for(var i = 0; i < am_length; i++)
-            {
-              console.log(am[i]);
-            }
-
-            var length_track = track_.trackers.length;
-            var cur = "";
-            can_add = true;
-            for(var i = 0; i < length_track; i++)
-            {
-		cur = track_.trackers[i];
-                for(var j = 0; j < length; j++)
-                {
-                   if (message[j].body == cur) {
-                      can_add = false;
-                      j = length;
-                   } 
-                }
-                if (can_add) {
-                   data.message.push({
-                      "body": cur,
-                      "date_added": Date.now()
-                   })
-                } else {
-                   can_add = true;
-                }
-            }
-            message = data.message;
-            length = message.length;            
-
-            if(have_oloader) {
-              var track_ = oloader;
-              var length_track = track_.trackers.length;
-              var cur = "";
-              can_add = true;
-              for(var i = 0; i < length_track; i++)
-              {
-                  cur = track_.trackers[i];
-                  for(var j = 0; j < length; j++)
-                  {
-                     if (message[j].body == cur) {
-                        can_add = false;
-                        j = length;
-                     } 
-                  }
-                  if (can_add) {
-                     data.message.push({
-                        "body": cur,
-                        "date_added": Date.now()
-                     })
-                  } else {
-                     can_add = true;
-                  }
-              }
-            }
-            message = data.message;
-            length = message.length;            
-
-            track_ = trackme;
-            var message_ = message;
-            var lt = message_;
-            var nlt = [];
-            var lt_length = lt.length;
-            var can_add_lt = true;
-            for(var i = 0; i < lt_length; i++)
-            {
-                for(var j = 0; j < am_length; j++)
-                {    
-                    if(lt[i].body == am[j]) {
-                       can_add_lt = false;
-                       j = am_length;
-                    }
-                }
-                if(can_add_lt)
-                { 
-                  nlt.push(lt[i]);
-                } else {
-                  can_add_lt = true;
-                }
-            }           
-            data.message = nlt;
-            lt = undefined; 
-            nlt = undefined;
-            lt_length = undefined; 
-            can_add_lt = undefined;
 
             // Encode data array to utf8 json text
             var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')))
@@ -546,53 +449,62 @@ class ZeroChat extends ZeroFrame {
         })
     }
 
-    
-    getMessages () {
-        var all_messages = [];
-        var all_messages_length = 0;
-        var new_messages = [];
-        var can_add = true;
-        var nmessages = [];
-        var nmessages_length = 1;
-        this.cmd("dbQuery", ["SELECT * FROM message LEFT JOIN json USING (json_id) ORDER BY date_added DESC"], (messages) => {
-            var m = messages;
-            var ml = messages.length;
-            for(var i = 0; i < ml; i++)
-            {
-               nmessages.push({
-                   "cert_user_id": m[i].cert_user_id,
-                   "body": m[i].body
-               });
-            }
-        })
-        
-        nmessages_length = nmessages.length;
-        console.log(nmessages_length);
-        for(var i = 0; i < nmessages_length; i++)
-        {
-          console.log("ok:" + nmessages[i].body);
-          for (var j = 0; j < all_messages_length; j++)
-          {
-              if(all_messages[j] == nmessages[i].body) {
-                can_add = false;
-                j = all_messages_length;
+    getMessages() {
+      if (document.getElementById("nmessages").innerHTML != "") {
+         return true;
+      }
+      this.cmd("fileQuery", ["data/users/*/data.json", ""], (function(_document) {
+         return function(data) {
+            var all_messages = [];
+            var new_messages = [];
+            var msg = "";
+            var msg_length = 0;
+            var am = all_messages;
+            var am_length = am.length;
+            var nm = [];
+            var can_add = true;
+            if(data) {
+              var dl = data.length;
+              for(var i = 0; i < dl; i++)
+              {
+                new_messages.push({"user_id": data[i].inner_path, "message": data[i].message});
               }
-          }
-          if(can_add) {
-            all_messages.push(nmessages[i].body);
-            new_messages.push(nmessages[i]);
-            all_messages_length = all_messages.length;
-          } else {
-            can_add = true;
-          }
-        }
-        return [all_messages, new_messages];
+              for(var i = 0; i < dl; i++)
+              {
+                msg = new_messages[i].message;
+                msg_length = msg.length;
+                for(var j = 0; j < msg_length; j++) {
+                    for(var k = 0; k < am_length; k++) {
+                         if(msg[j].body == am[k] && msg[j].body.length == am [k].length) {
+                            k = am_length;
+                            can_add = false;
+                         }
+                    }
+                    if(can_add) {
+                      am.push(msg[j].body);
+                      am_length = am.length;
+                      nm.push(msg[j]);
+                    } else {
+                      can_add = true;
+                    }
+                }
+                new_messages[i].message = nm;
+              }
+              all_messages = am;
+              
+              var ret = [all_messages,new_messages];
+              // Encode data array to utf8 json text
+              var json_raw_am = unescape(encodeURIComponent(JSON.stringify(ret), undefined, '\t'))
+              _document.getElementById("nmessages").innerHTML = btoa(json_raw_am);
+            }
+         };
+       })(document))
+       return true;
     }
-
 
     onOpenWebsocket () {
         this.messages = document.getElementById("messages")
-        this.addMessage("System", "Ready to call ZeroFrame API!")
+        this.addMessage("System", "Ready to get ZeroTrackers!")
         this.cmd("siteInfo", {}, (site_info) => {
             if (site_info.cert_user_id)
                 document.getElementById("select_user").innerText = site_info.cert_user_id
@@ -601,9 +513,10 @@ class ZeroChat extends ZeroFrame {
     }
 }
 
-page = new ZeroChat()
+page = new ZeroTrackers()
 
 </script>
 
 </body>
 </html>
+

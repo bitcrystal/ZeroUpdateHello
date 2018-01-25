@@ -5,13 +5,13 @@
  "cert_user_id": "bitcrystalkanoti@zeroid.bit",
  "files": {
   "data.json": {
-   "sha512": "eb368997a5ac2082a10bd4cf3714f3dc3ef4a96e3b8b26a11648517593048034",
-   "size": 1982
+   "sha512": "28caeeab91f4eb0ea7b24757e88b788bb863fa728935178f87292953f0f7d961",
+   "size": 445
   }
  },
  "inner_path": "data/users/14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ/content.json",
- "modified": 1516750774,
+ "modified": 1516839916,
  "signs": {
-  "14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ": "HPAmWn4gVCIjpfm1DmSIYy+jiO+5JRNhIO1CK+CgqbUPPHIBJ1wtDKtDf51dPq/e7U8r/y8yTO4rvKMQPgjkZtk="
+  "14iysqH2JcB8AsjMQoavPyTcLJtQQ8cdvZ": "G6yYtTlJ+bX+cdmbl9/Rfb0ZevDnaQ48zuOayQrHng4XK+66e7nWy0Eplp0GHuS+s3DbsTKfXuYinjnQJn6Csdc="
  }
 }
