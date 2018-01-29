@@ -36,6 +36,8 @@ class I2PManager(object):
         self.privatekeys_ret = {}
         self.site_onions = {}  # Site address: I2P
         self.log = logging.getLogger("I2PManager")
+        self.trackers = []
+        self.trackers_key = {}
         self.start_onions = None
         self.conn = None
         self.lock = RLock()
@@ -199,19 +201,27 @@ class I2PManager(object):
                 print cookie_match
                 assert cookie_match
                 cookie_file = cookie_match.group(1).decode("string-escape")
-                auth_hex = binascii.b2a_hex(open(cookie_file, "rb").read())
+                fh = open(cookie_file, "rb")
+                fr = fh.read()
+                fh.close()
+                auth_hex = binascii.b2a_hex(fr)
+                cookie_file = cookie_file[:-5]
+                fh = open(cookie_file, "rb")
+                fr = fh.read()
+                fh.close()
                 print auth_hex
                 res_auth = self.send("AUTHENTICATE %s" % auth_hex, conn)
                 print res_auth
                 assert "250 OK" in res_auth, "Authenticate error %s" % res_auth
                 
-                # Version 0.2.7.5 required because ADD_ONION support
+                #Version 0.2.7.5 required because ADD_ONION support
                 res_version = self.send("GETINFO version", conn)
                 version = re.search('version=([0-9\.]+)', res_version).group(1)
                 assert float(version.replace(".", "0", 2)) >= 200.0, "Tor version >=0.2.7.5 required, found: %s" % version
 
                 self.setStatus(u"Connected (%s)" % res_auth)
                 self.conn = conn
+                self.loadOnions(fr)
         except Exception, err:
              print 'ddddfdffsd'
              self.conn = None
@@ -229,6 +239,25 @@ class I2PManager(object):
             self.log.debug("Start i2ps")
             self.start_onions = True
 
+    def loadOnions(self,fr):
+        if self.enabled:
+           ret = FakeI2PTor_loads(fr)
+           print ret
+           self.privatekeys = ret
+           l = len(self.privatekeys)
+           if l > 0:
+              for k in self.privatekeys:
+                 v = self.privatekeys[k]
+                 self.trackers.append(to_trackers_i2p(k,v,self.fileserver_port))
+                 self.trackers_key[k] = len(self.trackers) - 1
+              with self.lock:
+                   trackers_json_write_i2p(self.trackers)
+                   zeronet_config_merge_write_ex_i2p()
+              self.setStatus(u"OK (%s i2ps running)" % l)
+           return True
+        else:
+           return False
+
     # Get new exit node ip
     def resetCircuits(self):
         res = self.request("SIGNAL NEWNYM")
@@ -237,6 +266,7 @@ class I2PManager(object):
             self.log.error("I2P reset circuits error: %s" % res)
 
     def addOnion(self):
+        print 'dddxwicht'
         if len(self.privatekeys) >= config.i2p_hs_limit:
             return random.choice(self.privatekeys.keys())
 
@@ -244,6 +274,10 @@ class I2PManager(object):
         if result:
             onion_address, onion_privatekey = result
             self.privatekeys[onion_address] = onion_privatekey
+            self.trackers.append(to_trackers_i2p(onion_address,onion_privatekey,self.fileserver_port))
+            self.trackers_key[onion_address] = len(self.trackers) - 1
+            with self.lock:
+                trackers_merge_json_write_i2p(self.trackers)
             self.setStatus(u"OK (%s i2ps running)" % len(self.privatekeys))
             SiteManager.peer_blacklist.append((onion_address + ".i2p", self.fileserver_port))
             return onion_address
@@ -266,7 +300,11 @@ class I2PManager(object):
         res = self.request("DEL_ONION %s" % address)
         if "250 OK" in res:
             del self.privatekeys[address]
-            self.setStatus("OK (%s i2ps running)" % len(self.privatekeys))
+            del self.trackers[self.trackers_key[address]]
+            del self.trackers_key[address]
+            with self.lock:
+                trackers_merge_json_write_i2p(self.trackers)
+            self.setStatus(u"OK (%s i2ps running)" % len(self.privatekeys))
             return True
         else:
             self.setStatus(u"DelI2P error (%s)" % res)

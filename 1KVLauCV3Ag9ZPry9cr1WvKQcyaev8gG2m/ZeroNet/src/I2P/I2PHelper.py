@@ -43,6 +43,13 @@ def utoba(s):
         d[k] = s[k]
     return d
 
+def utoba_ex(s):
+    d = utoba(s)
+    for k in s:
+        v = d[k]
+        d[k] = utobs(v)
+    return d
+
 def md5(N):
     m = hashlib.md5()
     m.update(N)
@@ -118,7 +125,19 @@ def http_request_nonce(host='127.0.0.1', port=4444, nonce="3"):
     else:
        return "3"
     return recv_data
+
+def get_new_nonce():
+    create_settings() 
+    ret = load_settings()
+    ret["i2p_http_proxy_nonce"] = http_request_nonce(host=utobs(ret["i2p_http_proxy_host"]), port=ret["i2p_http_proxy_port"], nonce=utobs(ret["i2p_http_proxy_nonce"]))
+    settings = ret    
+    save_settings(ret)
+    ret = load_settings()
+    return utobs(ret["i2p_http_proxy_nonce"])
     
+
+def http_request_proxy_bad_string():
+    return b'HTTP/1.1 409 Bad\r\nContent-Type: text/plain\r\nConnection: close\r\nProxy-Connection: close\r\n\r\nAdd to addressbook failed - bad parameters'
 
 def http_request_proxy(host,dest,router=b'router',nonce=b'3542682309546403524'):
   url_encoded = url_encode((b'http://%s.i2p/' % (host)))
@@ -136,8 +155,8 @@ def http_request_proxy(host,dest,router=b'router',nonce=b'3542682309546403524'):
 
 def http_request_proxy_add(host,dest,i2p_host=b'127.0.0.1', i2p_port=4444, i2p_nonce=b'3542682309546403524'):
     router = http_request_proxy(host,dest,b'router',i2p_nonce)
-    private = Replacer(router,b'=router',b'=private')
-    master = Replacer(router,b'=router',b'=master')
+    private = Replacer(router,b'router=router',b'router=private')
+    master = Replacer(router,b'router=router',b'router=master')
     router_len = len(router)
     private_len = len(private)
     master_len = len(master)
@@ -747,8 +766,8 @@ class i2p_bob:
            ret["entrys_2"]["QUIET"] = ret["entrys_2"]["QUIET"] == 'true'
         return ret
 
-    def load(self,check=True):
-        if self.started:
+    def load(self,check=True,check_start=True):
+        if self.started and check_start:
            return True
         # load connection
         self.i2p_sock_load = i2p_socket()
@@ -758,14 +777,28 @@ class i2p_bob:
         data = Replacer(data,b'\r\n',b' ')
         data = Replacer(data,b'\n', b' ')
         if not data.startswith(b'BOB 00.00.10 OK'):
-            print("ERROR _1")
-            li2p["started"] = False
-            self.seti2p_bob(li2p)
+            retv = False
+            if not self.started:
+               print("ERROR _1")
+               li2p["started"] = False
+               self.seti2p_bob(li2p)
+            else:
+               retv = True
             self.i2p_sock_load.i2p_close()
-            return False
+            return retv
 
         ret = self.get_data_message(self.i2p_sock_load)
         rows = ret["rows"]
+        print rows
+        print self.started
+        print check_start
+        if not check_start:
+           print "cool"
+           if rows > 1 and self.started: 
+            print "here"
+            self.i2p_sock_load.i2p_close()
+            return True
+
         entrys_1_len = ret["entrys_1_len"]
         entrys_2_len = ret["entrys_2_len"]
         msg = ret["msg"]
@@ -979,7 +1012,107 @@ class i2p_bob:
                  data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
                  if data.startswith(b'OK'):
                     ret["e_running"][erunkey] = True
-              
+
+        if rows < 2 and not check_start:
+           # out connection
+
+           in_is_out = False
+           if li2p["in_is_out"]:
+              in_is_out = True
+           
+           if (not in_is_out) and (li2p["insrvid"] == li2p["outsrvid"]) and (li2p["inpkey"] == li2p["outpkey"]):
+              in_is_out = True
+              li2p["in_is_out"] = in_is_out
+
+           if in_is_out:
+              quiet = li2p["quiet_in"] or li2p["quiet_out"]
+              li2p["quiet_in"] = li2p["quiet_out"] = quiet
+
+           self.seti2p_bob(li2p)
+
+           command = b'setnick'
+           param = li2p["outsrvid"]
+           
+           self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+           data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           command = b'setkeys'
+           param = li2p["outpkey"]
+
+           self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+           data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           command = b'quiet'   
+           param = li2p["quiet_out"]
+
+           self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+           data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           if not (li2p["outhost"] == "not_set" or li2p["outhost"] == b'not_set'):
+              command = b'outhost'
+              param = li2p["outhost"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           if not (li2p["outport"] == "not_set" or li2p["outport"] == b'not_set'):
+              command = b'outport'
+              param = li2p["outport"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           # in connection
+           
+           if not in_is_out:
+              command = b'start'
+
+              self.i2p_sock_load.i2p_send((b'%s\n' % (command)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+              command = b'setnick'   
+              param = li2p["insrvid"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+              command = b'setkeys'   
+              param = li2p["inpkey"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+          
+              command = b'quiet'
+              param = li2p["quiet_in"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+
+           if not (li2p["inhost"] == "not_set" or li2p["inhost"] == b'not_set'):
+              command = b'inhost'
+              param = li2p["inhost"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+         
+           if not (li2p["inport"] == "not_set" or li2p["inport"] == b'not_set'):
+              command = b'inport'
+              param = li2p["inport"]
+
+              self.i2p_sock_load.i2p_send((b'%s %s\n' % (command,param)))
+              data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           command = b'start'           
+  
+           self.i2p_sock_load.i2p_send((b'%s\n' % (command)))
+           data = self.i2p_sock_load.i2p_receive_until_linefeed_counted()
+
+           li2p["started"] = False
+           self.seti2p_bob(li2p)
+           self.i2p_sock_load.i2p_close()
+           return self.load()
+
        
         if (ret["e_running"]["out_1"] or ret["e_running"]["out_2"]) and (ret["e_running"]["in_1"] or ret["e_running"]["in_2"]):
            li2p["started"] = True
@@ -1403,34 +1536,57 @@ class FakeI2PTor:
         fp.close()
         return loads(str)
 
-    def loads(self,str):
+    def loads_prepare(self,str):
         str = binascii.a2b_base64(str)
-        ret = json.loads(str)
+        ret = json.loads(str)    
         self.srvid = ret["srvid"]
-        self.srvid_in = ret["srvid_in"]
+        self.srvid_in = ret["srvid_in"]  
         self.srvid_out = ret["srvid_out"]
-        self.srvid_in_pkey = ret["srvid_in_pkey"]
+        self.srvid_in_pkey = ret["srvid_in_pkey"]  
         self.srvid_out_pkey = ret["srvid_out_pkey"]
-        self.srvid_in_addr = ret["srvid_in_addr"]
+        self.srvid_in_addr = ret["srvid_in_addr"]  
         self.srvid_out_addr = ret["srvid_out_addr"]
-        self.srvid_in_addr_onion = ret["srvid_in_addr_onion"]
+        self.srvid_in_addr_onion = ret["srvid_in_addr_onion"]  
         self.srvid_out_addr_onion = ret["srvid_out_addr_onion"]
         self.port = ret["port"]
         self.port_range_faktor = ret["port_range_faktor"]
         self.i2p_host = ret["i2p_host"]
         self.i2p_port = ret["i2p_port"]
-        self.i2p_bob_i = i2p_bob(self.i2p_host,self.i2p_port,'0.0.0.0', '0.0.0.0', self.port + self.port_range_faktor, self.port, self.srvid_in, self.srvid_out)
-        reti = self.i2p_bob_i.loadsi2p_bob(ret["i2p"])
-        self.i2p_bob_i.seti2p_bob(reti)
-        self.start()        
+        return ret["i2p"]
 
-    def reload(self):
-        self.i2p_bob_i.load()
+    def loads(self,str,port_range_faktor=0):
+        reti = self.loads_prepare(str)
+        self.i2p_bob_i = i2p_bob(self.i2p_host,self.i2p_port,'0.0.0.0', '0.0.0.0', self.port + self.port_range_faktor, self.port, self.srvid_in, self.srvid_out)
+        reti = self.i2p_bob_i.loadsi2p_bob(reti)
+        inp = reti["inport"] - self.port_range_faktor
+        set = False
+        if inp != self.port:
+           self.port = inp
+           set = True
+
+        oldinp = inp + self.port_range_faktor
+        newinp = inp + port_range_faktor
+        if port_range_faktor > 0 and newinp != oldinp:
+           inp = newinp
+           self.port_range_faktor = port_range_faktor
+           set = True
+        else:
+           inp = oldinp
+
+        if set:
+           reti["inport"] = inp
+           reti["started"] = False
+        self.i2p_bob_i.seti2p_bob(reti)
+        self.start(True,False)
+        return (not set)        
+
+    def reload(self,check=True,check_start=True):
+        self.i2p_bob_i.load(check,check_start)
         self.i2p_bob_i.stop()
         self.i2p_bob_i.start()
 
-    def start(self):
-        self.i2p_bob_i.load()
+    def start(self,check=True,check_start=True):
+        self.i2p_bob_i.load(check,check_start)
         self.i2p_bob_i.start()
 
     def stop(self): 
@@ -1441,51 +1597,27 @@ def FakeI2PTor_loads(str):
     try:
         str = binascii.a2b_base64(str)
         ret = json.loads(str)
-        re = ret["i2p"]
-        re = binascii.a2b_base64(re)
-        re = json.loads(re)
-        ret["i2p"] = re
+        ret = utoba(ret)
+        ret[b'onion'] = utoba_ex(ret[b'onion'])
+        ret[b'onion_provider'] = utoba_ex(ret[b'onion_provider'])
+        onion_ = ret[b'onion']
+        onion_provider_ = ret[b'onion_provider']
+        no = {}
+        for k in onion_provider_:
+            v = onion_provider_[k]
+            if v in onion_:
+               no[k] = onion_[v]
+        for k in no:
+            v = no[k]
+            v = binascii.a2b_base64(v)
+            v = json.loads(v)
+            v = utoba(v)
+            v = utobs(v[b'srvid_in_pkey'])
+            no[k] = v
+        return no
     except:
-        ret = {}
-        ret["i2p"] = {}
-        r = ret
-        ret = r["i2p"]
-        ret["started"] = False
-        ret["i2p_host"] = ''
-        ret["i2p_port"] = 0
-        ret["inhost"] = ''
-        ret["outhost"] = ''
-        ret["inport"] = 0
-        ret["outport"] = 0
-        ret["insrvid"] = ''
-        ret["outsrvid"] = ''
-        ret["outpkey"] = ''
-        ret["inpkey"] = ''
-        ret["quiet_in"] = False
-        ret["quiet_out"] = False
-        ret["in_is_out"] = False
-        ret["outpaddr"] = ''
-        ret["inpaddr"] = ''
-        ret["outpaddr_onion"] = ''
-        ret["inpaddr_onion"] = ''
-       
-        r["i2p"] = ret
-        ret = r
-        ret["srvid"] = ''
-        ret["srvid_in"] = ''
-        ret["srvid_out"] = ''
-        ret["srvid_in_pkey"] = ''
-        ret["srvid_out_pkey"] = ''
-        ret["srvid_in_addr"] = ''
-        ret["srvid_out_addr"] = ''
-        ret["srvid_in_addr_onion"] = ''
-        ret["srvid_out_addr_onion"] = ''
-
-        ret["port"] = 0
-        ret["port_range_faktor"] = 0
-        ret["i2p_host"] = ''
-        ret["i2p_port"] = ''
-    return ret
+        no = {}
+    return no
 
 class Client_Thread:
 	def __init__(self, c_socket, addr, cf, i2p_host, i2p_port, port_range_faktor, i2p_http_proxy_host, i2p_http_proxy_port, i2p_http_proxy_nonce, lock, debug=False):
@@ -1504,6 +1636,7 @@ class Client_Thread:
                 self.onion_provider = {}
                 self.onions = []
                 self.cf=cf
+                self.os=None
                 self.port_range_faktor = port_range_faktor
                 self.authenticate = False
                 self.scf=(b'250-AUTH METHODS=COOKIE,SAFECOOKIE COOKIEFILE="%s.i2p.auth"\r\n' % self.cf)
@@ -1589,19 +1722,34 @@ class Client_Thread:
                       if len(f) == 2: 
                           try:
                              f = binascii.a2b_hex(f[1])
-                             if f == nrc:   
-                                self.c_socket.send(b'250 OK\r\n') 
+                             if f == nrc:    
                                 ret = self.loads(nr)
                                 self.loads_onion(ret)
                                 self.onions = []
-                                self.authenticate = True
+                                saved = False
+                                reti = True
+                                len_is_bigger_as_5 = len
                                 for k in self.onion:
                                     v = self.onion[k]
                                     n = FakeI2PTor()
-                                    n.loads(v)
+                                    q = 0
+                                    len_is_bigger_as_5 = (len(v) > 5)
+                                    if(len_is_bigger_as_5):
+                                        q = self.port_range_faktor
+                                    reti = n.loads(v,q)
+                                    if not reti:
+                                       saved = True
                                     self.onions.append(n)
-                                    if(len(v) > 5):
+                                    if(len_is_bigger_as_5):
                                        self.port_range_faktor = self.port_range_faktor + 1
+                                if saved:
+                                   self.lt()
+                                   state = self.dump()
+                                   self.save_state((b'%s.i2p' % self.cf),state)
+                                   self.save_md5_state((b'%s.i2p.auth' % self.cf),state)
+                                   self.ut()
+                                self.authenticate = True
+                                self.c_socket.send(b'250 OK\r\n')
                              else:
                                 self.c_socket.send(b'515 Authentication failed: Wrong length on authentication cookie.\r\n')
                                 self.c_socket.close()
@@ -1610,7 +1758,7 @@ class Client_Thread:
                               self.c_socket.close()
                       else:
                            self.c_socket.send(b'515 Authentication failed: Wrong length on authentication cookie.\r\n')
-                           self.c_socket.close()   
+                           self.c_socket.close() 
                 elif data.startswith(b'GETINFO version'):
                    self.c_socket.send(b'250-version=0.2.7.5\r\n')
                    self.c_socket.send(b'250 OK\r\n')
@@ -1752,10 +1900,14 @@ class Client_Thread:
 	def _print_debug(self, s):
 		if self.debug: self._print(s)
 
+        def dump_array(self,array):
+            str = binascii.b2a_base64(json.dumps(array))
+            return str
+      
         def dump(self):
             uret = {}
-            uret["onion"] = self.onion
-            uret["onion_provider"] = self.onion_provider 
+            uret[b'onion'] = self.onion
+            uret[b'onion_provider'] = self.onion_provider 
             ret = uret
             str = binascii.b2a_base64(json.dumps(ret))
             return str
@@ -1776,18 +1928,20 @@ class Client_Thread:
             str = binascii.a2b_base64(fonion)
             ret = json.loads(str)
             ret = utoba(ret)
+            ret[b'onion'] = utoba_ex(ret[b'onion'])
+            ret[b'onion_provider'] = utoba_ex(ret[b'onion_provider'])
             return ret
 
         def loads_onion(self,ret):
-            self.onion = ret["onion"]
-            self.onion_provider = ret["onion_provider"]
+            self.onion = ret[b'onion']
+            self.onion_provider = ret[b'onion_provider']
 
         def load(self,path):
             fp = open(path, 'rb')
             str = fp.read()
             fp.close()
             ret = self.loads(str)    
-            self.onion = ret
+            self.loads_onion(ret)
 
 class Socket_Server:
 	def __init__(self, host='', port=1234, i2p_host='127.0.0.1', i2p_port=2827, cf="/myservices/tor/control_auth_cookie", port_range_faktor=10, i2p_http_proxy_host='127.0.0.1', i2p_http_proxy_port=4444, i2p_http_proxy_nonce='', ssh=False, debug=False):
@@ -1888,8 +2042,552 @@ def save_settings(ret):
     fp.close()
 
 def current_dir():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__)).encode()
     return dir_path
+
+def os_sep():
+    return os.sep.encode()
+
+def main_dir():
+    dir_path = current_dir()
+    sep = os_sep()
+    dir_path = Replacer(dir_path,(b'%ssrc%sI2P%s' % (sep,sep,sep)),b'')
+    dir_path = Replacer(dir_path,(b'%ssrc%sI2P' % (sep,sep)),b'')
+    return dir_path
+
+def data_dir():
+    dir_path = main_dir()
+    sep = os_sep()
+    dir_path = (b'%s%sdata' % (dir_path,sep))
+    return dir_path
+
+def trackers_dir(folder):
+    sep = os_sep()
+    data_di = data_dir()
+    trackers_di = (b'%s%s%s' % (data_di,sep,folder))
+    return trackers_di
+
+def trackers_i2p_dir():
+    trackers_di = trackers_dir(b'17ziJ8EcCdHMvAu811HMzBQ1KtVXF2xX8t')
+    return trackers_di
+
+def trackers_onion_dir():
+    trackers_di = trackers_dir(b'1JheKmpBkc2Zab39UZXyK5m8ahAfe1HQqx')
+    return trackers_di
+
+def trackers_json(dir):
+    sep = os_sep()
+    trackers_di = dir
+    trackers_jso = (b'%s%s%s' % (trackers_di,sep,b'trackers.json'))
+    return trackers_jso
+
+def trackers2_json(dir):
+    sep = os_sep()  
+    trackers_di = dir
+    trackers_jso = (b'%s%s%s' % (trackers_di,sep,b'trackers2.json'))
+    return trackers_jso
+
+def zeronet_config():
+    sep = os_sep()
+    main_di = main_dir()
+    zeronet_conf = (b'%s%s%s' % (main_di,sep,b'zeronet.conf'))
+    return zeronet_conf
+
+def trackers_json_exists(dir):
+    return os.path.isfile(trackers_json(dir))
+
+def trackers2_json_exists(dir):
+    return os.path.isfile(trackers2_json(dir))
+
+def zeronet_config_exists():
+    return os.path.isfile(zeronet_config())
+
+
+def zeronet_config_read():
+    try:
+        e = {}
+        e[b'trackers'] = []
+        if(zeronet_config_exists()):
+          fp = open(zeronet_config(),b'rb')
+          e = fp.read()
+          fp.close()
+          e = e.encode()
+          e = Replacer(e,b'\r',b'')
+          f = e.split(b'\n')
+          nt = f
+          n = {}
+          g = b''
+          g_len = 0
+          last_g = b''
+          last_g_len = 0
+          lnt = len(nt)
+          i = 0
+          while(i<lnt):
+            if(nt[i] == b''):
+              i = i + 1
+              continue
+            nt[i] = Replacer(nt[i],b' = ',b'=')
+            g = nt[i].split(b'=')
+            g_len = len(g)
+            if g_len == 2:
+               n[g[0]] = []
+               n[g[0]].append(Replacer(Replacer(g[1],b' ',b''),b'\t',b''))
+               last_g = g
+               last_g_len = g_len
+            else:
+               if last_g_len > 0:
+                  n[last_g[0]].append(Replacer(Replacer(nt[i],b' ',b''),b'\t',b''))
+            i = i + 1
+          e = n
+          if not (b'trackers' in e):
+             e[b'trackers'] = []
+    except:
+        e = {}
+        e[b'trackers'] = []
+    return e
+
+def zeronet_config_write(zc):
+    nc = b''
+    nrt = []
+    for k in zc:
+        v = zc[k]
+        vl = len(v)
+        if(vl>0):
+          rtk = (b'%s = ' % (k))
+          rtv = (b'%s%s' % (rtk,v[0]))
+          rtp = b''
+          rtp_len = len(rtk)
+          i = 0
+          while(i<rtp_len):
+             rtp = (b'%s%s' % (rtp,b' '))
+             i = i + 1
+          nrt.append(rtv)
+          i = 1
+          while(i<vl):
+             nrt.append((b'%s%s' % (rtp,v[i])))
+             i = i + 1
+    i = 0
+    rlen = len(nrt)
+    while(i<rlen):
+       nc = (b'%s%s\n' % (nc,nrt[i]))
+       i = i + 1
+    fp=open(zeronet_config(),b'wb')
+    fp.write(nc)
+    fp.close()
+
+def zeronet_old_trackers():
+    nt = []
+    nt.append(b'zero://boot3rdez4rzn36x.onion:15441')
+    nt.append(b'zero://zero.booth.moe#f36ca555bee6ba216b14d10f38c16f7769ff064e0e37d887603548cc2e64191d:15441')
+    nt.append(b'udp://tracker.coppersurfer.tk:6969')
+    nt.append(b'udp://tracker.leechers-paradise.org:6969')
+    nt.append(b'udp://9.rarbg.com:2710')
+    nt.append(b'http://tracker.opentrackr.org:1337/announce')
+    nt.append(b'http://explodie.org:6969/announce')
+    nt.append(b'http://retracker.spark-rostov.ru:80/announce')
+    return nt
+
+def zeronet_trackers_format(trackers,old_trackers_append=False):
+    lt = len(trackers)
+    i = 0
+    if(old_trackers_append):
+      nt = zeronet_old_trackers()
+    else:
+      nt = []
+    s = b''
+    n = b''
+    naddr = b''
+    nport = b''
+    while(i<lt):
+      t = from_trackers(trackers[i])
+      if(t[b'port'] > 0):
+         if(t[b'is_onion']):
+           n = b'onion'
+         else:
+           n = b'i2p'
+         naddr = (b'%s' % (t[b'onion']))
+         nport = (b'%s' % (t[b'port']))
+         s = ('zero://%s.%s:%s' % (naddr,n,nport))
+         nt.append(s)
+      i = i + 1
+    return nt
+           
+def zeronet_config_merge_write(trackers):
+    oldt = zeronet_config_read()
+    old_trackers = oldt[b'trackers']
+    otl = len(old_trackers)
+    tl = len(trackers)
+    if(otl==0 or tl==0):
+         oldt[b'trackers'] = zeronet_trackers_format(trackers,True)
+         return zeronet_config_write(oldt)
+    trackers = zeronet_trackers_format(trackers,False)
+    tl = len(trackers)
+    i = 0
+    j = 0
+    nt = []
+    can_add = True
+    while(i < tl):
+        j = 0
+        while(j < otl):
+          if (trackers[i] == old_trackers[j]):
+             can_add = False
+             j = otl
+          j = j + 1
+
+        if(can_add):
+          nt.append(trackers[i])
+        else:
+          can_add = True
+        i = i + 1
+    trackers = nt
+    i = 0
+    while(i < otl):
+        trackers.append(old_trackers[i])
+        i = i + 1
+    oldt[b'trackers'] = trackers
+    return zeronet_config_write(oldt)
+
+def trackers_json_read(dir):
+    try:
+        e = {};
+        e[b'trackers'] = []
+        if(trackers_json_exists(dir)):
+           fp = open(trackers_json(dir),b'rb')
+           e = fp.read()
+           fp.close()
+           e = json.loads(e)
+           e = utoba(e)
+           f = e[b'trackers']
+           n = []
+           fl = len(f)
+           i = 0
+           while (i<fl):
+              f[i] = f[i].encode()
+              f[i] = from_trackers(f[i])
+              n.append(f[i])
+              i = i + 1
+           e[b'trackers'] = n
+    except:
+       e = {}
+       e[b'trackers'] = []
+    return e
+
+def trackers_json_read_ex(dir):
+    e = trackers_json_read(dir)
+    n = e[b'trackers']
+    n_len = len(n)
+    i = 0
+    g = []
+    while(i<n_len):
+       if(n[i][b'port'] > 0):
+         g.append(n[i])
+       i = i + 1
+    e[b'trackers'] = g
+    return e
+
+def trackers2_json_read(dir):
+    try:
+        e = {};
+        e[b'trackers'] = []
+        if(trackers2_json_exists(dir)):
+           fp = open(trackers2_json(dir),b'rb')
+           e = fp.read()
+           fp.close()
+           e = json.loads(e)
+           e = utoba(e)
+           f = e[b'trackers']
+           n = []
+           fl = len(f)
+           i = 0
+           while (i<fl):
+              f[i] = f[i].encode()
+              f[i] = from_trackers(f[i])
+              n.append(f[i])
+              i = i + 1
+           e[b'trackers'] = n
+    except:
+       e = {}
+       e[b'trackers'] = []
+    return e
+
+def trackers2_json_read_ex(dir):
+    e = trackers2_json_read(dir)
+    n = e[b'trackers']
+    n_len = len(n)
+    i = 0
+    g = []
+    while(i<n_len):
+       if(n[i][b'port'] > 0):
+         g.append(n[i])
+       i = i + 1
+    e[b'trackers'] = g
+    return e
+
+def zeronet_config_merge_write_ex(dir):
+    e = trackers2_json_read_ex(dir)
+    return zeronet_config_merge_write(e[b'trackers'])
+
+def trackers_json_read_raw(dir):
+    try:
+        e = {};
+        e[b'trackers'] = []
+        if(trackers_json_exists(dir)):
+          fp = open(trackers_json(dir),b'rb')
+          e = fp.read()
+          fp.close()
+          e = json.loads(e)
+          e = utoba(e)
+          nt = e[b'trackers']
+          lnt = len(nt)
+          i = 0
+          while(i<lnt):
+            nt[i] = nt[i].encode()
+            i = i + 1
+          e[b'trackers'] = nt
+    except:
+        e = {}
+        e[b'trackers'] = []
+    return e
+
+def trackers2_json_read_raw(dir):
+    try:
+        e = {};
+        e[b'trackers'] = []
+        if(trackers2_json_exists(dir)):
+          fp = open(trackers2_json(dir),b'rb')
+          e = fp.read()
+          fp.close()
+          e = json.loads(e)
+          e = utoba(e)
+          nt = e[b'trackers']
+          lnt = len(nt)
+          i = 0
+          while(i<lnt):
+            nt[i] = nt[i].encode()
+            i = i + 1
+          e[b'trackers'] = nt
+    except: 
+        e = {}
+        e[b'trackers'] = []
+    return e
+
+
+def to_trackers_onion(key,value,port):
+    ne = {}
+    ne[b'onion'] = key
+    ne[b'privatekey'] = value
+    ne[b'port'] = port
+    ne[b'is_i2p'] = False
+    ne[b'is_onion'] = True
+    str = json.dumps(ne)
+    str = Replacer(binascii.b2a_base64(str).encode(),b'\n',b'')
+    str = (b'base64:%s' % (str))
+    return str
+
+def to_trackers_i2p(key,value,port):
+    ne = {}
+    ne[b'onion'] = key
+    ne[b'privatekey'] = value
+    ne[b'port'] = port
+    ne[b'is_i2p'] = True
+    ne[b'is_onion'] = False
+    str = json.dumps(ne)
+    str = Replacer(binascii.b2a_base64(str).encode(),b'\n',b'')
+    str = (b'base64:%s' % (str))
+    return str 
+
+def from_trackers(ne):
+    try:
+        str = Replacer(ne,b'base64:',b'')
+        str = binascii.a2b_base64(str).encode()
+        ne = json.loads(str)
+        ne = utoba(ne)
+        ne[b'onion'] = ne[b'onion'].encode()
+        ne[b'privatekey'] = ne[b'privatekey'].encode()
+        ne[b'port'] = int(ne[b'port'])
+        ne[b'is_i2p'] = bool(ne[b'is_i2p'])
+        ne[b'is_onion'] = bool(ne[b'is_onion'])
+    except:
+        ne = {}
+        ne[b'onion'] = b''
+        ne[b'privatekey'] = b''
+        ne[b'port'] = 0
+        ne[b'is_i2p'] = False
+        ne[b'is_onion'] = False
+    return ne
+
+def trackers_add_i2p(trackers,key,value,port):
+    trackers.append(to_trackers_i2p(key,value,port))
+    return trackers
+
+def trackers_add_onion(trackers,key,value,port):
+    trackers.append(to_trackers_onion(key,value,port))
+    return trackers 
+
+def trackers_json_write(dir,trackers):
+    if(trackers_json_exists(dir)):
+      e = {};
+      e[b'trackers'] = trackers
+      js = json.dumps(e)
+      fp = open(trackers_json(dir),b'wb')
+      fp.write(js)
+      fp.close()
+      return True
+    return False
+
+def trackers2_json_write(dir,trackers):
+    if(trackers2_json_exists(dir)):
+      e = {};
+      e[b'trackers'] = trackers
+      js = json.dumps(e)
+      fp = open(trackers2_json(dir),b'wb')
+      fp.write(js)
+      fp.close()
+      return True
+    return False
+
+def trackers_merge_json_write(dir,trackers):
+    old_trackers = trackers_json_read_raw(dir)
+    old_trackers = old_trackers[b'trackers']
+    otl = len(old_trackers)
+    tl = len(trackers)
+    if(otl==0 or tl==0):
+      return False
+    i = 0
+    j = 0  
+    nt = []
+    can_add = True
+    while(i < tl):    
+        j = 0
+        while(j < otl):  
+          if (trackers[i] == old_trackers[j]):
+             can_add = False
+             j = otl
+          j = j + 1
+
+        if(can_add):
+          nt.append(trackers[i])
+        else: 
+          can_add = True 
+        i = i + 1
+
+    trackers = nt
+    i = 0
+    while(i < otl):
+        trackers.append(old_trackers[i])
+        i = i + 1
+    return trackers_json_write(dir,trackers)
+
+
+def trackers2_merge_json_write(dir,trackers):
+    old_trackers = trackers2_json_read_raw(dir)
+    old_trackers = old_trackers[b'trackers']
+    otl = len(old_trackers)
+    tl = len(trackers)
+    if(otl==0 or tl==0):
+      return False
+    i = 0  
+    j = 0    
+    nt = []  
+    can_add = True
+    while(i < tl):
+        j = 0
+        while(j < otl):
+          if (trackers[i] == old_trackers[j]):
+             can_add = False
+             j = otl
+          j = j + 1
+
+        if(can_add):
+          nt.append(trackers[i])
+        else:
+          can_add = True
+        i = i + 1
+
+    trackers = nt
+    i = 0
+    while(i < otl):
+        trackers.append(old_trackers[i])
+        i = i + 1
+    return trackers2_json_write(dir,trackers)
+
+def trackers_json_exists_i2p():
+    return trackers_json_exists(trackers_i2p_dir())
+
+def trackers2_json_exists_i2p():
+    return trackers2_json_exists(trackers_i2p_dir())
+
+def trackers_json_read_i2p():
+    return trackers_json_read(trackers_i2p_dir())
+    
+def trackers2_json_read_i2p():
+    return trackers2_json_read(trackers_i2p_dir())
+
+def trackers_json_read_ex_i2p():
+    return trackers_json_read_ex(trackers_i2p_dir())
+
+def trackers2_json_read_ex_i2p():
+    return trackers2_json_read_ex(trackers_i2p_dir())
+
+def trackers_json_read_raw_i2p():
+    return trackers_json_read_raw(trackers_i2p_dir())
+
+def trackers2_json_read_raw_i2p():
+    return trackers2_json_read_raw(trackers_i2p_dir())
+
+def trackers_merge_json_write_i2p(trackers):
+    return trackers_merge_json_write(trackers_i2p_dir(),trackers)
+
+def trackers2_merge_json_write_i2p(trackers):
+    return trackers2_merge_json_write(trackers_i2p_dir(),trackers)
+
+def trackers_json_write_i2p(trackers):
+    return trackers_json_write(trackers_i2p_dir(),trackers)
+
+def trackers2_json_write_i2p(trackers):
+    return trackers2_json_write(trackers_i2p_dir(),trackers)
+
+def zeronet_config_merge_write_ex_i2p():
+    return zeronet_config_merge_write_ex(trackers_i2p_dir())
+
+def trackers_json_exists_onion():
+    return trackers_json_exists(trackers_onion_dir())
+
+def trackers2_json_exists_onion():
+    return trackers2_json_exists(trackers_onion_dir())
+
+def trackers_json_read_onion():
+    return trackers_json_read(trackers_onion_dir())
+
+def trackers2_json_read_onion():
+    return trackers2_json_read(trackers_onion_dir())
+
+def trackers_json_read_ex_onion():
+    return trackers_json_read_ex(trackers_onion_dir())
+
+def trackers2_json_read_ex_onion():
+    return trackers2_json_read_ex(trackers_onion_dir())
+
+def trackers_json_read_raw_onion():
+    return trackers_json_read_raw(trackers_onion_dir())
+
+def trackers2_json_read_raw_onion():
+    return trackers2_json_read_raw(trackers_onion_dir())
+
+def trackers_merge_json_write_onion(trackers):
+    return trackers_merge_json_write(trackers_onion_dir(),trackers)
+
+def trackers2_merge_json_write_onion(trackers):
+    return trackers2_merge_json_write(trackers_onion_dir(),trackers)
+
+def trackers_json_write_onion(trackers):
+    return trackers_json_write(trackers_onion_dir(),trackers)
+
+def trackers2_json_write_onion(trackers):
+    return trackers2_json_write(trackers_onion_dir(),trackers)
+
+def zeronet_config_merge_write_ex_onion():
+    return zeronet_config_merge_write_ex(trackers_onion_dir())
 
 def create_settings():
     if os.path.isfile('settings.json'):
@@ -1927,11 +2625,11 @@ def startI2PHelperMain(set_signal_handler=False,second=False):
     # Add Here new settings
     #ret["debug"] = True  
     save_settings(ret)
+    ret = load_settings()
     if ret["i2p_http_proxy_nonce"] == "3" or ret["i2p_http_proxy_nonce"] == b'3':
        print "try again!"
     else:
-       server = Socket_Server(host=utobs(ret["server_host"]),port=ret["server_port"],cf=utobs(ret["cookiefile_path"]),i2p_host=utobs(ret["i2p_host"]),i2p_port=ret["i2p_port"],port_range_faktor=ret["port_range_faktor"],i2p_http_proxy_host=utobs(ret["i2p_http_proxy_host"]),i2p_http_proxy_port=ret["i2p_http_proxy_port"],i2p_http_proxy_nonce=ret["i2p_http_proxy_nonce"],ssh=set_signal_handler,debug=ret["debug"])
+       server = Socket_Server(host=utobs(ret["server_host"]),port=ret["server_port"],cf=utobs(ret["cookiefile_path"]),i2p_host=utobs(ret["i2p_host"]),i2p_port=ret["i2p_port"],port_range_faktor=ret["port_range_faktor"],i2p_http_proxy_host=utobs(ret["i2p_http_proxy_host"]),i2p_http_proxy_port=ret["i2p_http_proxy_port"],i2p_http_proxy_nonce=utobs(ret["i2p_http_proxy_nonce"]),ssh=set_signal_handler,debug=ret["debug"])
 
 if __name__ == "__main__":
    startI2PHelperMain()
-
