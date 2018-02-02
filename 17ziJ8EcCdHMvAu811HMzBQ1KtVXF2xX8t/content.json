@@ -31,11 +31,11 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1517254464,
+ "modified": 1517371123,
  "postmessage_nonce_security": true,
  "signers_sign": "G5qF+2ONc6nfWIg8zOXU60vqbs3ZRCOGao/SD0dbeCvLIYGzjkRRjLl3+OTX078RPIB3WS545XXw42kMO3058+E=",
  "signs": {
-  "17ziJ8EcCdHMvAu811HMzBQ1KtVXF2xX8t": "HKDYMjGKM4VZFuEvYVm4EPCRIO1f9DAFpq4knEwlKoGgCYEmkhOfHBmyoFcLCVs9b1knUNXodNouvqGuFd/K7FQ="
+  "17ziJ8EcCdHMvAu811HMzBQ1KtVXF2xX8t": "HBxMhz7st8TDKErKkDnhDvz7FakYxziVCvO84Qw9TuLtHqkAJcKHTtxNePOY1C3E8liNgxjujzJk+XhZgFFKsY8="
  },
  "signs_required": 1,
  "title": "ZeroTrackers I2P",

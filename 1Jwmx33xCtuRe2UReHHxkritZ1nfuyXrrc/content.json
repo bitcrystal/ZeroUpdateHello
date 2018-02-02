@@ -39,8 +39,8 @@
    "size": 1216
   },
   "js/all.js": {
-   "sha512": "cac3bae892bb0edbb23e857db46e7359e1abe5964ca0438ca64a164856e2f233",
-   "size": 300571
+   "sha512": "b5b50a6da0531f5d25e03eec747f766e8261698c441b1e0652bb9d9f7f8773fe",
+   "size": 300642
   },
   "languages/da.json": {
    "sha512": "aec7f0efc03710ad27013facfebdc4c2e3b938ebcf67e257fa2fb432c47b6842",
@@ -121,11 +121,11 @@
  },
  "ignore": "(js|css)/(?!all.(js|css))",
  "inner_path": "content.json",
- "modified": 1517263064,
+ "modified": 1517531827,
  "postmessage_nonce_security": true,
  "signers_sign": "HBSp184vN4MTBTLsXgr9rMxC15dLGRHkF4sVlGhda09CbZ1elCnqlpCaGsf0GRdexPKISkswDgk0fa/F1qI50b0=",
  "signs": {
-  "1Jwmx33xCtuRe2UReHHxkritZ1nfuyXrrc": "HOuMTuBJ059klkSMmkMvFeFgJiPza76pwcp8HYnhAC+JHj4kmvqU6AnsYRl/R7/ggy9DYbO3CKSJNmqOsbef4RA="
+  "1Jwmx33xCtuRe2UReHHxkritZ1nfuyXrrc": "HM4NeBGOFx0JsvMURbsE3Pehpccuf/DDZUQTH81uOWVIIiSrm1RLdOP8ggXFXPhvnMLp/rKf6Rvw8ls0rCjajz0="
  },
  "signs_required": 1,
  "title": "ZeroHello 4.0",

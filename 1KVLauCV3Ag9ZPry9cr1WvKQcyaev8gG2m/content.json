@@ -6,6 +6,10 @@
  "cloned_from": "1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D",
  "description": "Keep ZeroNet updated!",
  "files": {
+  "ZeroNet/3k.txt": {
+   "sha512": "7a473139472b43fea12d80cce45bd209cfbeafc3649fef953b820eb47bb8e03b",
+   "size": 69
+  },
   "ZeroNet/CHANGELOG-zh-cn.md": {
    "sha512": "cf08f81494f8daeb4b0efce29af42c3d20b625e0da04b45ca5517ec53ef6a58b",
    "size": 4602
@@ -34,9 +38,17 @@
    "sha512": "2aae0925181f5ce8dee3d9ab3262610596fe9e7a4d2f02c61d6485c6296c39a0",
    "size": 1196
   },
+  "ZeroNet/log/debug-last.log": {
+   "sha512": "e20621e6b21353f4da1917eff37898cb0cfc13719673c1167f1459d461f992a0",
+   "size": 174201
+  },
+  "ZeroNet/log/debug.log": {
+   "sha512": "5436f30981b427214ce9e522566f9e38d19ca3ada49ea0f5f033164631b508cf",
+   "size": 6496734
+  },
   "ZeroNet/plugins/AnnounceZero/AnnounceZeroPlugin.py": {
-   "sha512": "9b75a523786d5cab17612bc48a462f34372b929fa462fbb870718b38b03ed51d",
-   "size": 5155
+   "sha512": "080893fccca1afb64106a1ec7b922a3854195bb810964183e6256e68dc53c6fe",
+   "size": 6894
   },
   "ZeroNet/plugins/AnnounceZero/__init__.py": {
    "sha512": "0968c5e5ea9b3bd218a3b0b01197a92bed8de025f99e4bb2fbbc3e5d2726d02a",
@@ -67,8 +79,8 @@
    "size": 93
   },
   "ZeroNet/plugins/Chart/ChartCollector.py": {
-   "sha512": "e3bd6e97a8c372a4ab8dd324aeb8f9fb201d5a36bc3340831b3c5b432700481c",
-   "size": 7563
+   "sha512": "0cc91613b8ceed651e9195137193f336f011ef6a20b68570c34fe16f2192a869",
+   "size": 8304
   },
   "ZeroNet/plugins/Chart/ChartDb.py": {
    "sha512": "8b61344c26b54dbb53e58f3071b2505cf3b9a0293e68eb35b21d41665b4db6c6",
@@ -587,12 +599,12 @@
    "size": 36
   },
   "ZeroNet/src/Config.py": {
-   "sha512": "3922b851dc8cb8b5518ff43692bc7460fe8bca6568ba234652cdc9790bbfac4a",
+   "sha512": "94dd875eb73b90828df26fd24cdd71fd5f7949723d93e6d815f618e8c89ae848",
    "size": 24479
   },
   "ZeroNet/src/Connection/Connection.py": {
-   "sha512": "846854b52da4045d3679a3d276864d18ae2e906ae5216f89cfaf4d1d1f6eb28c",
-   "size": 22226
+   "sha512": "f5aebc8624c5a51c7a0bb0ddeba11049a09e451d42ee5cca1c9b2a9a8bde748d",
+   "size": 22462
   },
   "ZeroNet/src/Connection/ConnectionServer.py": {
    "sha512": "a800b39a9e7127838c09fe0bf1258d6ad6516f15b760e39dbef941d395f9d04f",
@@ -675,20 +687,20 @@
    "size": 39
   },
   "ZeroNet/src/File/FileRequest.py": {
-   "sha512": "78366fefd794cfab7cf8b237cdb9b71c5f5492f1977b28fffb842117d6d18a73",
-   "size": 20937
+   "sha512": "ed4f0e902c2a7308b9053c8f954a64eb23aecebdc992474ce7838e74b15c17ff",
+   "size": 20958
   },
   "ZeroNet/src/File/FileServer.py": {
-   "sha512": "611bacf9c7a70426bde86a4c7f219e6f7333f06ca22a53b253914dd4e7d4ca0a",
-   "size": 19134
+   "sha512": "6d84e31cda2f9f784f41d575c866bc385df8d1ee2942066aced152d512b906a3",
+   "size": 18997
   },
   "ZeroNet/src/File/__init__.py": {
    "sha512": "d54365ea93146ca4e8816d193501c8a413f5da5273adb5d89bf7b4a4b5d185a2",
    "size": 69
   },
   "ZeroNet/src/I2P/I2PHelper.py": {
-   "sha512": "6679b143c654a9e4c3ec53aefbb5a15c45fa85562a810490b9239903c55130d9",
-   "size": 93132
+   "sha512": "e0b50bd58d358a867ff69c49c661f07055247ee09b7a6a6ae060b8c449eaf90f",
+   "size": 93846
   },
   "ZeroNet/src/I2P/I2PManager.py": {
    "sha512": "49f00eb1daea4953735680aec01ed711ebd51b9bde992aafafe98a8a9f2abc14",
@@ -767,8 +779,8 @@
    "size": 3072
   },
   "ZeroNet/src/Peer/Peer.py": {
-   "sha512": "66be7c87f96ef1cac332807f7054d5f48335ecc458913d45d8dec211e52c431f",
-   "size": 14136
+   "sha512": "5a84ba9accfa7693876b8989f35f072bcc16792303aa004166d22e5abf8ca798",
+   "size": 14218
   },
   "ZeroNet/src/Peer/PeerHashfield.py": {
    "sha512": "942a103be2301f4f53bb1c79a6ef7d7f6166d7c06830cc25217a51d316291fe6",
@@ -787,8 +799,8 @@
    "size": 0
   },
   "ZeroNet/src/Site/Site.py": {
-   "sha512": "ca4126e4c1aed88bd3c76a689741f86495e35422ef894de215eeb8e0d2eed7cf",
-   "size": 55144
+   "sha512": "a8af53697886aeebfae28238d31fcb43a17332aa0006cf6d91871e08d6b5e0f3",
+   "size": 55387
   },
   "ZeroNet/src/Site/SiteManager.py": {
    "sha512": "20109459d9cfb33815c324621265ef28adb7210edf976aca6db81629a9ea3229",
@@ -851,8 +863,8 @@
    "size": 2471
   },
   "ZeroNet/src/Test/TestFileRequest.py": {
-   "sha512": "b2f8f23125353c1739f069c07fa3cd4e746a9f1ee6ed50a03cf09b77e40c07aa",
-   "size": 4445
+   "sha512": "c887ab0675636af4fb7cd776f3866b230aeb1fe2cd1a2e85bbca5dc6c4aa13d0",
+   "size": 4987
   },
   "ZeroNet/src/Test/TestHelper.py": {
    "sha512": "453c7a3a80488ad11fe186b9d0ceaec7dbe48da52c539236f0ad1b3f5baf6b5e",
@@ -887,8 +899,8 @@
    "size": 671
   },
   "ZeroNet/src/Test/TestTor.py": {
-   "sha512": "753dba09eed43b278cff9c2d2ac639a1bbf3b1bbf24c36f14175fabbc73ff841",
-   "size": 6359
+   "sha512": "ecb8a0c6838ea5abb65e530d49450d961c6276f87ac8de8705cb3bcdb92bd7b4",
+   "size": 6191
   },
   "ZeroNet/src/Test/TestTranslate.py": {
    "sha512": "949d1be00093f77c5f08564ddd3911493acf854e2809f76eeae75940b0ea784a",
@@ -1111,8 +1123,8 @@
    "size": 4267
   },
   "ZeroNet/src/Ui/UiRequest.py": {
-   "sha512": "4674d4e5d06c7c563a663d3cef512358c184b5e8f8de1fb5cdd338258ea786ba",
-   "size": 30505
+   "sha512": "89884c2ab0bbdab05f4e69c04ea2d5a7c878f640f8614d49ffdf8cbcd761595f",
+   "size": 30606
   },
   "ZeroNet/src/Ui/UiServer.py": {
    "sha512": "fd26a3914184b5d81de1616446f836c032141d91795b0c2dd2eee2b6532fcc84",
@@ -1359,8 +1371,8 @@
    "size": 1185
   },
   "ZeroNet/src/lib/geventwebsocket/websocket.py": {
-   "sha512": "aff4094926afc710407695c7f34c4ff4ff511a0f405ee99fad3c0cda80008139",
-   "size": 16205
+   "sha512": "120f76277977740bba24b0f9eafd9c0861b1acb907f6cef21687c698204466d0",
+   "size": 16384
   },
   "ZeroNet/src/lib/merkletools/LICENSE": {
    "sha512": "179fd03ff33b133895ac3e93e4d8325bea99f8f7feaa353c844b296175343708",
@@ -1763,8 +1775,8 @@
    "size": 6766
   },
   "ZeroNet/src/main.py": {
-   "sha512": "857cb2f45149699e99a43be96cad102a0d58c43f109e3e60630526a4f3477de4",
-   "size": 19423
+   "sha512": "cb408d1bffa5e76f837580e90a7b7bbce0801f1caa069093a578ea4a0a34ffe4",
+   "size": 19422
   },
   "ZeroNet/src/util/Diff.py": {
    "sha512": "45bf02ef4863f4096df912d1c0350cc7c42a1359023262b7a636287ba55e4225",
@@ -1819,20 +1831,16 @@
    "size": 84
   },
   "ZeroNet/src/util/helper.py": {
-   "sha512": "d610fd65a9e33f604a5a2976df8ad3b82706098e201a3d1b4808d3fb69abd813",
-   "size": 6873
+   "sha512": "1fcca35f30bacc6fced0521e531684561577182f419801f8b10d1c94a98db50a",
+   "size": 7064
   },
   "ZeroNet/start.bat": {
    "sha512": "adf86d5f0321c494938c1d3828bb17dd67eacb433e697de71688bc4d042ef926",
    "size": 181
   },
-  "ZeroNet/start.py": {
-   "sha512": "f26b4fa73796384ec9f067592188efbeab2d631fd729e6a1a95486d040ae63e8",
-   "size": 243
-  },
   "ZeroNet/start.sh": {
-   "sha512": "15d9feadc0a9c8bc2e403a3592afba5b23b342393eb6212af9c1652516ab8bee",
-   "size": 1298
+   "sha512": "561434195f7882a0773f893074ad1ced5867c34376dac603df7ca478085c1e32",
+   "size": 1323
   },
   "ZeroNet/tools/coffee/README.md": {
    "sha512": "fe3847a2ff0ca487fd216b1356f5dd8f287c15283ce8d88db37e45e8e8756c37",
@@ -1863,8 +1871,12 @@
    "size": 216
   },
   "ZeroNet/update.py": {
-   "sha512": "0b9042d8e742f60b60d3c0206ac847c371235db7c38762fe3155769e2f5e2ce9",
-   "size": 4807
+   "sha512": "cb73313ac1f4f772bea0440313437d8f1aeadfe76de513980368fbf78eb6bebf",
+   "size": 4654
+  },
+  "ZeroNet/zeronet.conf": {
+   "sha512": "0673006104ef851bb3d702c55ebd53f4f0f34f59eb069810b6ef227d893f3203",
+   "size": 448
   },
   "ZeroNet/zeronet.py": {
    "sha512": "481ad692928c0dbd910533c1f85e342a10b47f9ce1f9810035d51ba2e41fe3af",
@@ -1881,11 +1893,11 @@
  },
  "ignore": "(.*/\\..*|.*db|.*pyc)",
  "inner_path": "content.json",
- "modified": 1517254322,
+ "modified": 1517535927,
  "postmessage_nonce_security": true,
  "signers_sign": "G05PL+nFj2uKAR2gZwNDGVnaZRDZ41QqLtUBDb7GI1KfDfI6o4iFHfjscnMtARy5wP/qZxNJFP0GJVqt+ThoYyA=",
  "signs": {
-  "1KVLauCV3Ag9ZPry9cr1WvKQcyaev8gG2m": "HG53TgEPPloXG4FJ52B3jeP84g1vxadW7yQ7K1JOyf63JLy00balBLJRGo+ZK+P0+6G3y6dmfQrgtxmhpJq8xaI="
+  "1KVLauCV3Ag9ZPry9cr1WvKQcyaev8gG2m": "G/Uv07lejtvBIPXuURDx3e6CNVbkW78XubMZGqEvXD0XEmg34eRb4u6TVE9nHYjdIHf0kXxdaegbwyQ640Xx7dc="
  },
  "signs_required": 1,
  "title": "ZeroUpdate 2.0",

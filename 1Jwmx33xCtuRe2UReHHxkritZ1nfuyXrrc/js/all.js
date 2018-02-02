@@ -2358,7 +2358,11 @@
       if (this.searching_text && this.searching_text.length > 1) {
         return Text.highlight(title, this.searching_text);
       } else {
-        return title;
+        if (title) {
+          return title;
+        } else {
+          return "";
+        }
       }
     };
 
