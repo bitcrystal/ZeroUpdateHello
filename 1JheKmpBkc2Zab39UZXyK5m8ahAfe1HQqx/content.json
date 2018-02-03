@@ -31,11 +31,11 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1517254365,
+ "modified": 1517697310,
  "postmessage_nonce_security": true,
  "signers_sign": "HDzHS4OFNEcoiejN2FC0ITTzYPafSW7Zv/876FKYvL9Ceyr3jn1uwIkFYO3X+FlNk4zYdbBNcwj+B/8QTcBVoxM=",
  "signs": {
-  "1JheKmpBkc2Zab39UZXyK5m8ahAfe1HQqx": "HIZKRfxwfgJCwchZdtPEUDh94mY8WrRARjRJlCSPfOmYL2zeTv02Mwzyaagpdi8ZM6u1fhhTYPZdZneZz/Rddn8="
+  "1JheKmpBkc2Zab39UZXyK5m8ahAfe1HQqx": "G7FEvV5DfJoeP7AE7RnGuSR0zshHQykliFK0FxF8G0B/NTnuJB/aEGfHOA5+9moJMvo8url89nZ+AZZbVyDsNqA="
  },
  "signs_required": 1,
  "title": "ZeroTrackers Onion",
