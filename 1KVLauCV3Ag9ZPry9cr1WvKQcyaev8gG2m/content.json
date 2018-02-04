@@ -39,12 +39,12 @@
    "size": 1196
   },
   "ZeroNet/log/debug-last.log": {
-   "sha512": "e20621e6b21353f4da1917eff37898cb0cfc13719673c1167f1459d461f992a0",
-   "size": 174201
+   "sha512": "2f13b20bd048ba0080b6fdccba73865a8b015b502a3ad038b18dc940a82d45e0",
+   "size": 13517
   },
   "ZeroNet/log/debug.log": {
-   "sha512": "5436f30981b427214ce9e522566f9e38d19ca3ada49ea0f5f033164631b508cf",
-   "size": 6496734
+   "sha512": "56cade0bbae74bd42f28f6c2bf9fe9a5c25300fe2ed1c50abb991096f4688a43",
+   "size": 893385
   },
   "ZeroNet/plugins/AnnounceZero/AnnounceZeroPlugin.py": {
    "sha512": "080893fccca1afb64106a1ec7b922a3854195bb810964183e6256e68dc53c6fe",
@@ -79,8 +79,8 @@
    "size": 93
   },
   "ZeroNet/plugins/Chart/ChartCollector.py": {
-   "sha512": "0cc91613b8ceed651e9195137193f336f011ef6a20b68570c34fe16f2192a869",
-   "size": 8304
+   "sha512": "f8e09012dc5189899e75e3e46bb7beb5ae8cb782b541683af2701ca55825ab93",
+   "size": 8712
   },
   "ZeroNet/plugins/Chart/ChartDb.py": {
    "sha512": "8b61344c26b54dbb53e58f3071b2505cf3b9a0293e68eb35b21d41665b4db6c6",
@@ -275,16 +275,16 @@
    "size": 441
   },
   "ZeroNet/plugins/PeerDb/PeerDbPlugin.py": {
-   "sha512": "ec60a062bea6038acd63c20cc60dfee14e92e8d8070880059eda8294eee37775",
-   "size": 3825
+   "sha512": "6f806c23247288a5368203f1e424c96f3fa3f648c4fb6c3c842e083f2272b765",
+   "size": 3963
   },
   "ZeroNet/plugins/PeerDb/__init__.py": {
    "sha512": "8d73282829bb6ba80bb8c93b4c3287c024be6ab64b5b6d84dd3e42fa22eca9aa",
    "size": 21
   },
   "ZeroNet/plugins/Sidebar/SidebarPlugin.py": {
-   "sha512": "12a133f74203e6f1fe1e03b4de2dbe5d4ecbf7239af25288dfae7e914d3fe9d3",
-   "size": 26350
+   "sha512": "f20f53e3cdeb0aba7fd8e733d5ab4365960ca900868c4a94b08123abd0767ee0",
+   "size": 26757
   },
   "ZeroNet/plugins/Sidebar/__init__.py": {
    "sha512": "1d3af1a8b0804be7113746e005859948d5deb1ea7386f5004b9223476c3a6573",
@@ -407,8 +407,8 @@
    "size": 12591
   },
   "ZeroNet/plugins/Stats/StatsPlugin.py": {
-   "sha512": "616578e73c3c974b85b7c8b1bae72dab8c3b7092243a51d0a76895be88a04418",
-   "size": 39790
+   "sha512": "3af910952673c0aaf52bd105b5ee1a0d2560309f7551da5ec99f016f11e37a8a",
+   "size": 40073
   },
   "ZeroNet/plugins/Stats/__init__.py": {
    "sha512": "673e8f2b6a5da98d1d4ec3c707782649604ddc6c2824797fdedd217a215f9e9d",
@@ -623,8 +623,8 @@
    "size": 4736
   },
   "ZeroNet/src/Content/ContentManager.py": {
-   "sha512": "c9e673dac594820da88da8ccbbe702a98ee13507a788070f0a600d8101872349",
-   "size": 44892
+   "sha512": "406335dfc81c3a69d2726e84fb78c06e7648531250fe04152bdb4bb3bbb76342",
+   "size": 44939
   },
   "ZeroNet/src/Content/__init__.py": {
    "sha512": "ec52ffaa07c31df36ab5371e67f743cd519793c53fca44a83bf5232260d60bfc",
@@ -699,8 +699,8 @@
    "size": 69
   },
   "ZeroNet/src/I2P/I2PHelper.py": {
-   "sha512": "e0b50bd58d358a867ff69c49c661f07055247ee09b7a6a6ae060b8c449eaf90f",
-   "size": 93846
+   "sha512": "66ca7de4698dc9baba5bd1f78fd0582bf67f8a84301e8a6a2084550e0af12598",
+   "size": 97407
   },
   "ZeroNet/src/I2P/I2PManager.py": {
    "sha512": "49f00eb1daea4953735680aec01ed711ebd51b9bde992aafafe98a8a9f2abc14",
@@ -759,8 +759,8 @@
    "size": 481
   },
   "ZeroNet/src/I2P/settings.json": {
-   "sha512": "d2ef94b0357f300141ec077d111b2df3cc019455f9fc6d04b0a999b0516699b9",
-   "size": 290
+   "sha512": "06643bed3615c499287aca34d78880d9e8f5d583a13b0134685439964aa4a8db",
+   "size": 291
   },
   "ZeroNet/src/I2P/test.py": {
    "sha512": "ce0050bcc7c685641c62fd84e939110c76cce822bed02d01dddcb660aab3c1ff",
@@ -1893,11 +1893,11 @@
  },
  "ignore": "(.*/\\..*|.*db|.*pyc)",
  "inner_path": "content.json",
- "modified": 1517535927,
+ "modified": 1517711598,
  "postmessage_nonce_security": true,
  "signers_sign": "G05PL+nFj2uKAR2gZwNDGVnaZRDZ41QqLtUBDb7GI1KfDfI6o4iFHfjscnMtARy5wP/qZxNJFP0GJVqt+ThoYyA=",
  "signs": {
-  "1KVLauCV3Ag9ZPry9cr1WvKQcyaev8gG2m": "G/Uv07lejtvBIPXuURDx3e6CNVbkW78XubMZGqEvXD0XEmg34eRb4u6TVE9nHYjdIHf0kXxdaegbwyQ640Xx7dc="
+  "1KVLauCV3Ag9ZPry9cr1WvKQcyaev8gG2m": "Gw/KTg1I8xh28qx+y/8fOMIQvQxkMsTYBhMUOFseelD9IhB/yiz4vv6x2HIYhCXdTi3lpP0p0DMKUIZCAkC4GLc="
  },
  "signs_required": 1,
  "title": "ZeroUpdate 2.0",
